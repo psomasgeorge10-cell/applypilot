@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. The palette is deliberately small: one neutral ramp (slate),
+ * one accent (indigo) and three status hues. Light and dark are both
+ * first-class - the dark variant follows the operating system preference,
+ * which is Tailwind v4's default `dark:` behaviour.
+ */
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+@layer base {
+  /* A single, consistent focus ring for every interactive element. */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-indigo-500);
+    outline-offset: 2px;
+    border-radius: 0.375rem;
+  }
+
+  /* Hide the native number-input spinners: budgets are typed, not stepped. */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

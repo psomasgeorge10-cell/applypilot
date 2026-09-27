@@ -1,0 +1,71 @@
+# Runs ApplyPilot against a real PostgreSQL server.
+#
+#   ANTHROPIC_API_KEY=... docker compose up --build   start Postgres, the app and the worker
+#   docker compose run --rm seed                      create the demo account (once)
+
+x-app-env: &app-env
+  DATABASE_URL: postgresql://applypilot:applypilot@db:5432/applypilot
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  APPLY_LIVE: ${APPLY_LIVE:-false}
+  # Replace before exposing this anywhere: openssl rand -base64 32
+  AUTH_SECRET: ${AUTH_SECRET:-change-me-in-production-0123456789abcdef}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: applypilot
+      POSTGRES_PASSWORD: applypilot
+      POSTGRES_DB: applypilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U applypilot -d applypilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      target: runner
+    environment:
+      <<: *app-env
+      DATABASE_AUTO_MIGRATE: "true"
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Runs every user's pipeline on a schedule.
+  worker:
+    build:
+      context: .
+      target: worker
+    environment:
+      <<: *app-env
+      WORKER_INTERVAL_MINUTES: ${WORKER_INTERVAL_MINUTES:-60}
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  # One-shot helper, not part of `docker compose up`.
+  seed:
+    build:
+      context: .
+      target: worker
+    command: ["npm", "run", "db:setup"]
+    profiles: ["tools"]
+    environment:
+      DATABASE_URL: postgresql://applypilot:applypilot@db:5432/applypilot
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres-data:

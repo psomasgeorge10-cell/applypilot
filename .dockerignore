@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.github
+.pglite
+.env
+.env.*
+!.env.example
+npm-debug.log*
+dev.log
+README.md
+docs
