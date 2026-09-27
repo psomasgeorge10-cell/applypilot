@@ -52,3 +52,6 @@ dev.log
 
 # production server log
 prod.log
+
+# desktop icon created by npm run launch
+.applypilot-shortcut

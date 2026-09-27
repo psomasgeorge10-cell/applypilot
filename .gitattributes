@@ -2,3 +2,6 @@
 *.ico binary
 *.png binary
 *.jpg binary
+# Windows batch files need CRLF line endings.
+*.cmd text eol=crlf
+*.icns binary

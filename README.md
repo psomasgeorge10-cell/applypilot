@@ -15,16 +15,22 @@ Built with Next.js 16, TypeScript, Tailwind CSS v4, PostgreSQL, the Anthropic SD
 
 ## Launch it on your computer
 
-You need [Node.js 20+](https://nodejs.org) and, for auto-apply, Google Chrome.
+You need [Node.js](https://nodejs.org) (the LTS version). For auto-apply you also need Chrome or Edge; Edge comes with Windows.
 
-```bash
-git clone https://github.com/psomasgeorge10-cell/applypilot
-cd applypilot
-npm install
-npm run launch
-```
+1. **Get the code.** Either run `git clone https://github.com/psomasgeorge10-cell/applypilot`, or on the GitHub page click **Code → Download ZIP** and unzip it.
+2. **Double-click the starter file** in that folder:
+   - Windows: **`start-windows.cmd`**
+   - macOS: **`start-mac.command`**
+   - Linux: run `npm run launch` in the folder.
 
-`npm run launch` asks for your [Anthropic API key](https://console.anthropic.com), finds Chrome, sets up the database, starts the app and opens http://localhost:3000. After the first run it goes straight to starting the app.
+The first run installs everything, which takes a few minutes. It asks for your [Anthropic API key](https://console.anthropic.com) and adds an **ApplyPilot icon to your desktop** (on Windows, to the Start menu as well). From then on, **just double-click the icon.** It starts ApplyPilot and opens it in your browser.
+
+- A terminal window opens next to the app. Keep it open while you use ApplyPilot, and close it when you want to stop.
+- Double-clicking the icon while ApplyPilot is already running just opens it again.
+- If you move the project folder, run `npm run shortcut` inside it to point the icon at the new location.
+- For files downloaded as a ZIP:
+  - Windows may ask "Do you want to run this file?". Choose **Run**.
+  - macOS may say it "cannot verify" `start-mac.command`. Right-click it and choose **Open**, or go to **System Settings → Privacy & Security → Open Anyway**. The desktop icon is created on your own machine, so it never gets this warning.
 
 Sign in as `demo@example.com` / `password123` to look around with example data, or create your own account. You don't need to install a database: locally the app uses [PGlite](https://pglite.dev), which is PostgreSQL stored in `./.pglite`.
 
@@ -102,7 +108,8 @@ src/server/
   submit/index.ts   one application, end to end
   repo.ts           all SQL
   schema.sql        the schema (idempotent)
-scripts/            db setup, migrations, background worker
+scripts/            launcher, desktop icon, db setup, migrations, background worker
+assets/             app icon (SVG source, Windows .ico, macOS .icns, PNG)
 tests/              unit + PGlite integration tests with fake AI, boards and browser
 ```
 
@@ -114,7 +121,8 @@ Every call goes to `claude-opus-5` by default (`ANTHROPIC_MODEL` overrides it) w
 
 | Command | What it does |
 | --- | --- |
-| `npm run launch` | first-time setup and start, in one command |
+| `npm run launch` | install, set up and start, in one command (what the desktop icon runs) |
+| `npm run shortcut` | (re)create the desktop icon |
 | `npm run dev` | development server |
 | `npm run build && npm start` | production build (`AUTH_SECRET` required) |
 | `npm test` | unit and integration tests |
@@ -122,3 +130,4 @@ Every call goes to `claude-opus-5` by default (`ANTHROPIC_MODEL` overrides it) w
 | `npm run db:setup` | schema plus demo account (`-- --force` recreates it) |
 | `npm run db:migrate` | schema only, for a real Postgres server |
 | `npm run worker` | scheduled pipeline runner |
+| `npm run icons` | regenerate `assets/` icons and the favicon from `assets/applypilot.svg` |
