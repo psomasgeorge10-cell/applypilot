@@ -13,20 +13,37 @@ Built with Next.js 16, TypeScript, Tailwind CSS v4, PostgreSQL, the Anthropic SD
 
 ---
 
-## Quick start
+## Launch it on your computer
+
+You need [Node.js 20+](https://nodejs.org) and, for auto-apply, Google Chrome.
 
 ```bash
+git clone https://github.com/psomasgeorge10-cell/applypilot
+cd applypilot
 npm install
-cp .env.example .env.local     # then set ANTHROPIC_API_KEY
-npm run db:setup               # creates the schema and a demo account
-npm run dev                    # http://localhost:3000
+npm run launch
 ```
 
-Sign in as `demo@example.com` / `password123` to look around with example data, or create your own account.
+`npm run launch` asks for your [Anthropic API key](https://console.anthropic.com), finds Chrome, sets up the database, starts the app and opens http://localhost:3000. After the first run it goes straight to starting the app.
 
-You don't need to install a database. With no `DATABASE_URL`, the app runs on [PGlite](https://pglite.dev), which is PostgreSQL compiled to WebAssembly and stored in `./.pglite`.
+Sign in as `demo@example.com` / `password123` to look around with example data, or create your own account. You don't need to install a database: locally the app uses [PGlite](https://pglite.dev), which is PostgreSQL stored in `./.pglite`.
 
-To use auto-apply, point `CHROMIUM_PATH` at a Chrome or Chromium binary.
+## Launch it online (Render)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/psomasgeorge10-cell/applypilot)
+
+1. Click the button and sign in to Render with GitHub. Because the repo is private, give Render access to it when asked.
+2. Render reads [`render.yaml`](render.yaml) and asks for two values:
+   - `ANTHROPIC_API_KEY`: your key.
+   - `SIGNUP_ALLOWLIST`: your email, for example `you@gmail.com`. **Set this**: every account on the site spends your API credits. Use a comma-separated list for several people, `@company.com` for a whole domain, or `*` to open sign-ups to everyone.
+3. Click **Apply**. Render creates a PostgreSQL database and the web service, generates the session secret and builds the Docker image, which includes Chromium for auto-apply. The first deploy takes about 5 to 10 minutes.
+4. Open the `onrender.com` URL, create your account, upload your resume and follow some companies.
+
+Job searches run automatically every hour (`SCHEDULER_INTERVAL_MINUTES`). Submissions stay in dry-run mode until you change `APPLY_LIVE` to `true` under the service's **Environment** tab.
+
+**Cost:** the blueprint uses Render's Starter web plan and Basic database (about $13/month in total at the time of writing), plus your Anthropic usage. Render's free web plan sleeps when idle, which stops the hourly search, and free databases expire, so they aren't used.
+
+The same Docker image runs on any container host (Railway, Fly.io, a VPS). Give it `DATABASE_URL`, `AUTH_SECRET`, `ANTHROPIC_API_KEY`, `DATABASE_AUTO_MIGRATE=true` and optionally `SCHEDULER_INTERVAL_MINUTES`.
 
 ## How applying works
 
@@ -52,9 +69,9 @@ If any **required** field is still empty, the form is **not** submitted. The app
 - **CAPTCHAs are never bypassed.** Some forms show a CAPTCHA the user has to solve. When that happens the application is marked failed with a note to apply by hand.
 - **LinkedIn and Indeed are not scraped.** Their terms forbid automated access and applying. ApplyPilot only uses the public posting APIs that Greenhouse, Lever and Ashby publish for exactly this purpose.
 
-## Background worker
+## Scheduled searches
 
-"Find new jobs" in the UI runs the pipeline for the signed-in user. To run it for every user on a schedule:
+"Find new jobs" in the UI runs the pipeline for the signed-in user. To run it for every user on a schedule, either set `SCHEDULER_INTERVAL_MINUTES` so the web server does it (this is what the Render deployment does), or run a separate worker:
 
 ```bash
 npm run worker            # every WORKER_INTERVAL_MINUTES (default 60)
@@ -97,6 +114,7 @@ Every call goes to `claude-opus-5` by default (`ANTHROPIC_MODEL` overrides it) w
 
 | Command | What it does |
 | --- | --- |
+| `npm run launch` | first-time setup and start, in one command |
 | `npm run dev` | development server |
 | `npm run build && npm start` | production build (`AUTH_SECRET` required) |
 | `npm test` | unit and integration tests |

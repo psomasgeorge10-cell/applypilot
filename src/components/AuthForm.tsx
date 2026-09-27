@@ -8,15 +8,24 @@ import { fieldErrors, loginSchema, signupSchema } from "@/lib/validation";
 import { LogoIcon } from "./icons";
 import { Button, Card, Field, controlClass } from "./ui";
 
-/** Credentials created by `npm run db:setup`. */
+/** Credentials created by `npm run db:setup`; only offered when that account exists. */
 const DEMO = { email: "demo@example.com", password: "password123" };
 
-export function AuthForm({ mode, redirectTo }: { mode: "login" | "signup"; redirectTo: string }) {
+export function AuthForm({
+  mode,
+  redirectTo,
+  showDemo = false,
+}: {
+  mode: "login" | "signup";
+  redirectTo: string;
+  /** Pre-fill the demo account's credentials (only when it exists). */
+  showDemo?: boolean;
+}) {
   const router = useRouter();
   const isSignup = mode === "signup";
   const [name, setName] = useState("");
-  const [email, setEmail] = useState(isSignup ? "" : DEMO.email);
-  const [password, setPassword] = useState(isSignup ? "" : DEMO.password);
+  const [email, setEmail] = useState(showDemo ? DEMO.email : "");
+  const [password, setPassword] = useState(showDemo ? DEMO.password : "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -97,7 +106,7 @@ export function AuthForm({ mode, redirectTo }: { mode: "login" | "signup"; redir
             <>New here? <Link href="/signup" className="font-medium text-indigo-600 hover:underline">Create an account</Link></>
           )}
         </p>
-        {!isSignup && (
+        {showDemo && (
           <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
             Demo account: <code className="font-mono">{DEMO.email}</code> / <code className="font-mono">{DEMO.password}</code>
           </p>

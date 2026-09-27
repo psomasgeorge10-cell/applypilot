@@ -52,6 +52,15 @@ export async function createUser(
   return rows[0];
 }
 
+export const DEMO_EMAIL = "demo@example.com";
+
+/** True when `npm run db:setup` has created the demo account on this database. */
+export async function demoAccountExists(given?: Database): Promise<boolean> {
+  const conn = await db(given);
+  const { rows } = await conn.query<{ id: number }>(`SELECT id FROM users WHERE email = $1`, [DEMO_EMAIL]);
+  return rows.length > 0;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Profile                                                                     */
 /* -------------------------------------------------------------------------- */

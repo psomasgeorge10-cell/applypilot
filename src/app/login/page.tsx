@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/AuthForm";
 import { getSessionUser } from "@/server/auth";
+import { demoAccountExists } from "@/server/repo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,5 +20,5 @@ export default async function LoginPage({ searchParams }: PageProps) {
   // Only accept a same-site path, so `?next=` cannot bounce a user to another origin.
   const redirectTo = next?.startsWith("/") && !next.startsWith("//") ? next : "/";
 
-  return <AuthForm mode="login" redirectTo={redirectTo} />;
+  return <AuthForm mode="login" redirectTo={redirectTo} showDemo={await demoAccountExists()} />;
 }
